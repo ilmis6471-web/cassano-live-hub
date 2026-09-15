@@ -1,0 +1,1 @@
+Admin Creator panel specification: create, edit, delete creators; manage name, username, platform, avatar URL, profile URL, live URL, live title, and LIVE/OFFLINE status. Authentication will be required before public production use.
