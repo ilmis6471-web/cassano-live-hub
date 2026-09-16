@@ -4,6 +4,7 @@ const pool=new Pool({connectionString:process.env.DATABASE_URL,ssl:{rejectUnauth
 const root=path.join(__dirname,'public');
 const ADMIN_TOKEN=process.env.ADMIN_TOKEN||'change-me';
 const DISCORD_WEBHOOK_URL=process.env.DISCORD_WEBHOOK_URL||'';
+const DISCORD_ROLE_IDS=(process.env.DISCORD_ROLE_IDS||'').split(',').map(x=>x.trim()).filter(Boolean);
 const YOUTUBE_API_KEY=process.env.YOUTUBE_API_KEY||'';
 const TWITCH_CLIENT_ID=process.env.TWITCH_CLIENT_ID||'';
 const TWITCH_CLIENT_SECRET=process.env.TWITCH_CLIENT_SECRET||'';
@@ -60,7 +61,7 @@ async function notifyDiscord(c,info){
  if(!DISCORD_WEBHOOK_URL)return;
  const content='🔴 **'+c.name+' sedang LIVE!**';
  const embed={title:c.name+' is LIVE',description:info.live_title||'Sedang live sekarang',url:info.live_url||c.live_url||c.profile_url||undefined,color:16722072,fields:[{name:'Platform',value:c.platform||'Other',inline:true},{name:'Creator',value:'@'+c.username,inline:true}]};
- try{await fetch(DISCORD_WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content,embeds:[embed],allowed_mentions:{parse:[]}})})}catch(e){console.error('discord webhook',e.message)}
+ try{await fetch(DISCORD_WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content,embeds:[embed],allowed_mentions:{parse:[],roles:DISCORD_ROLE_IDS}})})}catch(e){console.error('discord webhook',e.message)}
 }
 async function checkAll(){
  const q=await pool.query('SELECT * FROM creators ORDER BY id'); 
