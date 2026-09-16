@@ -3,6 +3,14 @@ const {Pool}=require('pg');
 const pool=new Pool({connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:false}});
 const root=path.join(__dirname,'public');
 const ADMIN_TOKEN=process.env.ADMIN_TOKEN||'change-me';
+function artwork(res,name){
+  try{
+    const files=name==='cassano-bg.webp'?['cassano-bg.txt']:['chunk1.txt','chunk2.txt','chunk3.txt','chunk4.txt'];
+    const b64=files.map(x=>fs.readFileSync(path.join(root,'artwork',x),'utf8').trim()).join('');
+    const data=Buffer.from(b64,'base64');
+    res.writeHead(200,{'Content-Type':'image/webp','Cache-Control':'public,max-age=3600'});res.end(data);
+  }catch(e){res.writeHead(404);res.end('Artwork not found')}
+}
 
 async function init(){
   await pool.query("CREATE TABLE IF NOT EXISTS creators(id SERIAL PRIMARY KEY,name TEXT NOT NULL,username TEXT NOT NULL,platform TEXT NOT NULL DEFAULT 'Other',avatar_url TEXT DEFAULT '',profile_url TEXT DEFAULT '',live_url TEXT DEFAULT '',bio TEXT DEFAULT '',is_live BOOLEAN NOT NULL DEFAULT FALSE,live_title TEXT DEFAULT '',viewers INTEGER NOT NULL DEFAULT 0,last_checked_at TIMESTAMPTZ,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())");
@@ -13,6 +21,8 @@ function body(req){return new Promise((resolve,reject)=>{let b='';req.on('data',
 
 const server=http.createServer(async(req,res)=>{
  try{
+  if(req.url==='/cassano-bg.webp'){return artwork(res,'cassano-bg.webp')}
+  if(req.url==='/cassano-group.webp'){return artwork(res,'cassano-group.webp')}
   if(req.url==='/api/creators'&&req.method==='GET'){
    const q=await pool.query('SELECT * FROM creators ORDER BY is_live DESC,name ASC');return json(res,200,q.rows)
   }
