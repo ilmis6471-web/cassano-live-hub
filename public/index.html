@@ -1,5 +1,40 @@
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cassano Live</title><link rel="stylesheet" href="/style.css"></head><body>
-<div class="scene" aria-hidden="true"><img class="silhouetteScene" src="/silhouettes.svg" alt=""></div><div class="silhouette roblox"></div><div class="silhouette valorant"></div></div>
+<div class="scene" aria-hidden="true">
+<svg class="silhouetteSvg" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMax meet">
+<defs>
+<g id="real">
+<ellipse cx="60" cy="58" rx="34" ry="42"/><path d="M35 98Q60 82 85 98l15 34 28 25-17 58-27-42v104l-13 122H39L26 277V173L0 215l-17-58 27-25z"/><path d="M31 350h25l-5 190H23zM64 350h25l10 190H72z"/><path d="M30 104Q60 125 90 104l-5 45q-25 20-50 0z"/>
+</g>
+<g id="hood">
+<path d="M25 73Q60 25 95 73L87 103Q60 118 33 103z"/><ellipse cx="60" cy="83" rx="29" ry="36"/><path d="M35 118Q60 105 85 118l18 32 34 30-20 63-30-45v118H33V198L3 243l-20-63 34-30z"/><path d="M35 316h26v224H30zM62 316h26l10 224H68z"/><path d="M25 132Q60 155 95 132"/>
+</g>
+<g id="agent">
+<path d="M31 75Q60 22 89 75l-8 34H39z"/><ellipse cx="60" cy="77" rx="28" ry="35"/><path d="M35 113Q60 101 85 113l16 34 31 27-19 60-27-40v112H34V194L7 234l-18-60 31-27z"/><path d="M35 306h25v234H28zM63 306h25l11 234H68z"/><path d="M28 132Q60 150 92 132l-6 32q-26 16-52 0z"/>
+</g>
+<g id="roblox">
+<rect x="25" y="0" width="70" height="70" rx="8"/><rect x="18" y="82" width="84" height="190" rx="9"/><rect x="-5" y="92" width="20" height="145" rx="9"/><rect x="105" y="92" width="20" height="145" rx="9"/><rect x="25" y="272" width="28" height="190"/><rect x="67" y="272" width="28" height="190"/>
+</g>
+</defs>
+<g fill="#252934" opacity=".72">
+<use href="#hood" transform="translate(20 365) scale(1.05)"/>
+<use href="#real" transform="translate(155 455) scale(.72)"/>
+<use href="#agent" transform="translate(255 300) scale(.92)"/>
+<use href="#roblox" transform="translate(390 525) scale(.62)"/>
+<use href="#hood" transform="translate(500 395) scale(.82)"/>
+<use href="#real" transform="translate(610 465) scale(.64)"/>
+<use href="#agent" transform="translate(710 345) scale(1.0)"/>
+<use href="#roblox" transform="translate(850 500) scale(.55)"/>
+<use href="#hood" transform="translate(925 355) scale(.98)"/>
+<use href="#real" transform="translate(1050 455) scale(.72)"/>
+<use href="#agent" transform="translate(1115 330) scale(.7)"/>
+</g>
+<g fill="#0f1117" opacity=".92">
+<use href="#hood" transform="translate(-45 465) scale(.72)"/>
+<use href="#agent" transform="translate(335 410) scale(.56)"/>
+<use href="#real" transform="translate(790 425) scale(.58)"/>
+<use href="#hood" transform="translate(1180 470) scale(.62)"/>
+</g>
+</svg></div><div class="silhouette roblox"></div><div class="silhouette valorant"></div></div>
 <nav class="nav"><a class="logo" href="/"><span class="logoMark" aria-label="Cassano"><img src="/cassano-logo.webp" alt=""></span><span>CASSANO<span class="pink">LIVE</span></span></a><div class="navRight"><span id="lastUpdate">Connecting...</span><a class="manage" href="/admin.html">Manage creators</a></div></nav>
 <main><section class="hero"><div><div class="kicker"><i></i> CASSANO COMMUNITY</div><h1>Who's <span>LIVE?</span></h1><p>Temukan member Cassano yang sedang live sekarang.</p></div><div class="liveStat"><strong id="count">0</strong><small>LIVE NOW</small></div></section>
 <section class="toolbar"><div class="tabs" id="tabs"><button class="active" data-platform="All">All</button><button data-platform="YouTube">YouTube</button><button data-platform="TikTok">TikTok</button><button data-platform="Twitch">Twitch</button><button data-platform="Kick">Kick</button></div><label class="search">⌕<input id="search" placeholder="Cari creator..."></label></section>
