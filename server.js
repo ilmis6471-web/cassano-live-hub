@@ -16,6 +16,8 @@ async function init(){
  await pool.query("ALTER TABLE creators ADD COLUMN IF NOT EXISTS last_live_at TIMESTAMPTZ");
  await pool.query("ALTER TABLE creators ADD COLUMN IF NOT EXISTS last_offline_at TIMESTAMPTZ");
  await pool.query("ALTER TABLE creators ADD COLUMN IF NOT EXISTS last_checked_at TIMESTAMPTZ");
+ await pool.query("CREATE TABLE IF NOT EXISTS live_sessions(id SERIAL PRIMARY KEY,creator_id INTEGER NOT NULL REFERENCES creators(id) ON DELETE CASCADE,started_at TIMESTAMPTZ NOT NULL,ended_at TIMESTAMPTZ,live_title TEXT DEFAULT '',live_url TEXT DEFAULT '',platform TEXT DEFAULT '',peak_viewers INTEGER NOT NULL DEFAULT 0,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())");
+ await pool.query("CREATE TABLE IF NOT EXISTS discord_notifications(id SERIAL PRIMARY KEY,creator_id INTEGER REFERENCES creators(id) ON DELETE SET NULL,event_type TEXT NOT NULL,success BOOLEAN NOT NULL DEFAULT FALSE,message TEXT DEFAULT '',created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())");
 }
 function json(res,status,data){res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':'*'});res.end(JSON.stringify(data))}
 function auth(req){return req.headers.authorization==='Bearer '+ADMIN_TOKEN}
@@ -69,7 +71,7 @@ async function checkAll(){
   const info=await checkCreator(c); if(!info)continue;
   const was=!!c.is_live, now=!!info.is_live;
   await pool.query('UPDATE creators SET is_live=$1,live_title=$2,live_url=COALESCE($3,live_url),viewers=$4,last_checked_at=NOW(),last_live_at=CASE WHEN $1 AND NOT is_live THEN NOW() ELSE last_live_at END,last_offline_at=CASE WHEN NOT $1 AND is_live THEN NOW() ELSE last_offline_at END,updated_at=NOW() WHERE id=$5',[now,info.live_title||'',info.live_url||null,info.viewers||0,c.id]);
-  if(now&&!was)await notifyDiscord(c,info);
+  if(now&&!was){await pool.query('INSERT INTO live_sessions(creator_id,started_at,live_title,live_url,platform,peak_viewers) VALUES($1,NOW(),$2,$3,$4,$5)',[c.id,info.live_title||'',info.live_url||c.live_url||'',c.platform||'',info.viewers||0]);await notifyDiscord(c,info)} if(!now&&was){await pool.query(`UPDATE live_sessions SET ended_at=NOW() WHERE creator_id=$1 AND ended_at IS NULL`,[c.id])} if(now&&was){await pool.query(`UPDATE live_sessions SET peak_viewers=GREATEST(peak_viewers,$1) WHERE creator_id=$2 AND ended_at IS NULL`,[info.viewers||0,c.id])}
  }
 }
 function artwork(res,name){
@@ -80,6 +82,10 @@ const server=http.createServer(async(req,res)=>{
   if(req.url==='/cassano-group.webp')return artwork(res,'cassano-group.webp');
   if(req.url==='/api/health')return json(res,200,{ok:true,liveDetection:{youtube:!!YOUTUBE_API_KEY,twitch:!!TWITCH_CLIENT_ID&&!!TWITCH_CLIENT_SECRET,discord:!!DISCORD_WEBHOOK_URL},interval_ms:POLL_MS});
   if(req.url==='/api/creators'&&req.method==='GET'){const q=await pool.query('SELECT * FROM creators ORDER BY is_live DESC,name ASC');return json(res,200,q.rows)}
+  if(req.url==='/api/creators'&&req.method==='GET'){const q=await pool.query('SELECT * FROM creators ORDER BY is_live DESC,name ASC');return json(res,200,q.rows)}
+  if(req.url.startsWith('/api/creator/')&&req.method==='GET'){const id=req.url.split('/')[3];const c=await pool.query('SELECT * FROM creators WHERE id=$1',[id]);if(!c.rows[0])return json(res,404,{error:'Not found'});const sessions=await pool.query('SELECT * FROM live_sessions WHERE creator_id=$1 ORDER BY started_at DESC LIMIT 20',[id]);return json(res,200,{creator:c.rows[0],sessions:sessions.rows})}
+  if(req.url==='/api/history'&&req.method==='GET'){const q=await pool.query('SELECT ls.*,c.name,c.username,c.avatar_url FROM live_sessions ls JOIN creators c ON c.id=ls.creator_id ORDER BY ls.started_at DESC LIMIT 50');return json(res,200,q.rows)}
+  if(req.url==='/api/notifications'&&req.method==='GET'){const q=await pool.query('SELECT dn.*,c.name,c.username FROM discord_notifications dn LEFT JOIN creators c ON c.id=dn.creator_id ORDER BY dn.created_at DESC LIMIT 50');return json(res,200,q.rows)}
   if(req.url==='/api/stats'&&req.method==='GET'){const q=await pool.query(`SELECT COUNT(*)::int AS total,COUNT(*) FILTER(WHERE is_live)::int AS live,COUNT(*) FILTER(WHERE NOT is_live)::int AS offline,COUNT(*) FILTER(WHERE last_live_at IS NOT NULL)::int AS ever_live FROM creators`);const recent=await pool.query(`SELECT * FROM creators WHERE last_live_at IS NOT NULL ORDER BY last_live_at DESC LIMIT 8`);return json(res,200,{...q.rows[0],recent:recent.rows})}
   if(req.url==='/api/admin/discord-test'&&req.method==='POST'){if(!auth(req))return json(res,401,{error:'Unauthorized'});if(!DISCORD_WEBHOOK_URL)return json(res,400,{error:'DISCORD_WEBHOOK_URL belum diatur'});const r=await fetch(DISCORD_WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:'🟢 **Cassano Live Hub — Test Notification**',embeds:[{title:'Discord terhubung!',description:'Notifikasi Cassano Live Hub siap digunakan.',color:5763719,footer:{text:'Cassano Live Hub'}}],allowed_mentions:{parse:[]}})});if(!r.ok)return json(res,502,{error:'Discord menolak webhook'});return json(res,200,{ok:true})}
   if(req.url==='/api/admin/login'&&req.method==='POST'){const d=await body(req);const ok=d.token===ADMIN_TOKEN;return json(res,ok?200:401,{ok})}
