@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+<defs><g id="human"><ellipse cx="90" cy="55" rx="38" ry="43"/><path d="M65 92 Q90 82 115 92 L130 125 Q165 140 176 185 L151 210 133 170 126 290 107 410 90 420 72 410 54 290 47 170 29 210 4 185 Q15 140 50 125Z"/><path d="M55 285 L78 285 84 520 55 520Z"/><path d="M102 285 L125 285 126 520 97 520Z"/></g>
+<g id="hoodie"><ellipse cx="90" cy="52" rx="36" ry="42"/><path d="M55 90 Q90 75 125 90 L140 120 170 145 151 205 128 174 122 295 Q90 315 58 295 L52 174 29 205 10 145 40 120Z"/><path d="M58 288 L82 288 79 520 48 520Z"/><path d="M99 288 L122 288 132 520 101 520Z"/><path d="M52 105 Q90 125 128 105 L118 148 Q90 165 62 148Z"/></g>
+<g id="agent"><ellipse cx="90" cy="48" rx="35" ry="40"/><path d="M58 87 Q90 72 122 87 L135 120 166 148 148 202 123 166 120 300 90 320 60 300 57 166 32 202 14 148 45 120Z"/><path d="M59 295 L83 295 78 520 48 520Z"/><path d="M98 295 L122 295 132 520 102 520Z"/><path d="M48 118 Q90 138 132 118 L118 150 Q90 162 62 150Z"/></g></defs>
+<g fill="#171922">
+<use href="#hoodie" transform="translate(-30 300) scale(1.25 1.05)" opacity=".95"/>
+<use href="#human" transform="translate(210 360) scale(.82 .78)" opacity=".68"/>
+<use href="#agent" transform="translate(395 245) scale(1.05 1.05)" opacity=".82"/>
+<use href="#human" transform="translate(610 405) scale(.66 .62)" opacity=".52"/>
+<use href="#hoodie" transform="translate(760 300) scale(.95 .9)" opacity=".78"/>
+<use href="#agent" transform="translate(965 350) scale(.74 .72)" opacity=".62"/>
+<use href="#hoodie" transform="translate(1110 240) scale(1.08 1.02)" opacity=".88"/>
+<use href="#human" transform="translate(1370 365) scale(.78 .74)" opacity=".65"/>
+</g>
+<!-- Roblox silhouettes -->
+<g fill="#171922" opacity=".72"><g transform="translate(530 510) scale(.52)"><rect x="55" y="0" width="70" height="70" rx="7"/><path d="M45 82H135V255H45Z"/><rect x="12" y="92" width="25" height="135" rx="10" transform="rotate(8 24 160)"/><rect x="143" y="92" width="25" height="135" rx="10" transform="rotate(-8 155 160)"/><rect x="57" y="255" width="28" height="155"/><rect x="95" y="255" width="28" height="155"/></g><g transform="translate(1240 520) scale(.45)"><rect x="55" y="0" width="70" height="70" rx="7"/><path d="M45 82H135V255H45Z"/><rect x="12" y="92" width="25" height="135" rx="10" transform="rotate(-12 24 160)"/><rect x="143" y="92" width="25" height="135" rx="10" transform="rotate(12 155 160)"/><rect x="57" y="255" width="28" height="155"/><rect x="95" y="255" width="28" height="155"/></g></g>
+</svg>
