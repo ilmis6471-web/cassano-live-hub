@@ -8,6 +8,8 @@ const DISCORD_ROLE_IDS=(process.env.DISCORD_ROLE_IDS||'').split(',').map(x=>x.tr
 const YOUTUBE_API_KEY=process.env.YOUTUBE_API_KEY||'';
 const TWITCH_CLIENT_ID=process.env.TWITCH_CLIENT_ID||'';
 const TWITCH_CLIENT_SECRET=process.env.TWITCH_CLIENT_SECRET||'';
+// TikTok's current public Display API does not expose a generic public LIVE-status endpoint.
+// Keep TikTok creators supported in the data model, but do not fake LIVE detection.
 const POLL_MS=Math.max(15000,Number(process.env.LIVE_CHECK_INTERVAL_MS||30000));
 let twitchToken='',twitchTokenExpires=0;
 
@@ -56,6 +58,9 @@ async function checkCreator(c){
  try{
   if(p==='youtube')return await ytLive(c);
   if(p==='twitch')return await twitchLive(c);
+  // TikTok is intentionally not scraped. The official Display API currently covers
+  // profile/video data, not generic public LIVE-status detection.
+  if(p==='tiktok')return null;
   return null;
  }catch(e){console.error('live check',c.id,e.message);return null}
 }
@@ -80,7 +85,7 @@ const server=http.createServer(async(req,res)=>{
  try{
   if(req.url==='/cassano-bg.webp')return artwork(res,'cassano-bg.webp');
   if(req.url==='/cassano-group.webp')return artwork(res,'cassano-group.webp');
-  if(req.url==='/api/health')return json(res,200,{ok:true,liveDetection:{youtube:!!YOUTUBE_API_KEY,twitch:!!TWITCH_CLIENT_ID&&!!TWITCH_CLIENT_SECRET,discord:!!DISCORD_WEBHOOK_URL},interval_ms:POLL_MS});
+  if(req.url==='/api/health')return json(res,200,{ok:true,liveDetection:{youtube:!!YOUTUBE_API_KEY,twitch:!!TWITCH_CLIENT_ID&&!!TWITCH_CLIENT_SECRET,tiktok:false,discord:!!DISCORD_WEBHOOK_URL},interval_ms:POLL_MS});
   if(req.url==='/api/creators'&&req.method==='GET'){const q=await pool.query('SELECT * FROM creators ORDER BY is_live DESC,name ASC');return json(res,200,q.rows)}
   if(req.url==='/api/creators'&&req.method==='GET'){const q=await pool.query('SELECT * FROM creators ORDER BY is_live DESC,name ASC');return json(res,200,q.rows)}
   if(req.url.startsWith('/api/creator/')&&req.method==='GET'){const id=req.url.split('/')[3];const c=await pool.query('SELECT * FROM creators WHERE id=$1',[id]);if(!c.rows[0])return json(res,404,{error:'Not found'});const sessions=await pool.query('SELECT * FROM live_sessions WHERE creator_id=$1 ORDER BY started_at DESC LIMIT 20',[id]);return json(res,200,{creator:c.rows[0],sessions:sessions.rows})}
