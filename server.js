@@ -25,7 +25,7 @@ function body(req){return new Promise((resolve,reject)=>{let b='';req.on('data',
 function urlValue(u){try{return new URL(u)}catch{return null}}
 async function ytLive(c){
  if(!YOUTUBE_API_KEY)return null;
- const u=urlValue(c.live_url||c.profile_url); if(!u)return null;
+ const u=urlValue(c.profile_url); if(!u)return null;
  let channelId=u.searchParams.get('channel_id');
  let handle=(u.pathname.match(/@([^/]+)/)||[])[1];
  if(!channelId&&u.pathname.includes('/channel/'))channelId=u.pathname.split('/channel/')[1].split('/')[0];
@@ -92,10 +92,10 @@ const server=http.createServer(async(req,res)=>{
   if(req.url.startsWith('/api/creators')&&['POST','PUT','DELETE'].includes(req.method)){
    if(!auth(req))return json(res,401,{error:'Unauthorized'});
    const d=await body(req);
-   if(req.method==='POST'){if(!d.name||!d.username)return json(res,400,{error:'name and username are required'});const q=await pool.query('INSERT INTO creators(name,username,platform,avatar_url,profile_url,live_url,bio) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *',[d.name,d.username,d.platform||'Other',d.avatar_url||'',d.profile_url||'',d.live_url||'',d.bio||'']);return json(res,201,q.rows[0])}
+   if(req.method==='POST'){if(!d.name||!d.username)return json(res,400,{error:'name and username are required'});const q=await pool.query('INSERT INTO creators(name,username,platform,avatar_url,profile_url,bio) VALUES($1,$2,$3,$4,$5,$6) RETURNING *',[d.name,d.username,d.platform||'Other',d.avatar_url||'',d.profile_url||'',d.bio||'']);return json(res,201,q.rows[0])}
    const id=req.url.split('/').pop();
    if(req.method==='DELETE'){await pool.query('DELETE FROM creators WHERE id=$1',[id]);return json(res,200,{ok:true})}
-   const q=await pool.query('UPDATE creators SET name=COALESCE($1,name),username=COALESCE($2,username),platform=COALESCE($3,platform),avatar_url=COALESCE($4,avatar_url),profile_url=COALESCE($5,profile_url),live_url=COALESCE($6,live_url),bio=COALESCE($7,bio),updated_at=NOW() WHERE id=$8 RETURNING *',[d.name,d.username,d.platform,d.avatar_url,d.profile_url,d.live_url,d.bio,id]);return json(res,200,q.rows[0]||{})
+   const q=await pool.query('UPDATE creators SET name=COALESCE($1,name),username=COALESCE($2,username),platform=COALESCE($3,platform),avatar_url=COALESCE($4,avatar_url),profile_url=COALESCE($5,profile_url),bio=COALESCE($6,bio),updated_at=NOW() WHERE id=$7 RETURNING *',[d.name,d.username,d.platform,d.avatar_url,d.profile_url,d.bio,id]);return json(res,200,q.rows[0]||{})
   }
   let f=req.url==='/'?'/index.html':req.url.split('?')[0];f=path.normalize(f).replace(/^\.\.(\/|\\)/,'');const file=path.join(root,f);
   fs.readFile(file,(e,data)=>{if(e){res.writeHead(404);return res.end('Not found')}const ext=path.extname(file);const types={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.webp':'image/webp','.png':'image/png'};res.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream'});res.end(data)})
